@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPI Produtividade Equipes Externas — PMO Proxxima</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1e293b}
+  .header{background:linear-gradient(135deg,#0e2d5e 0%,#1a4a8a 100%);color:#fff;padding:28px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .header-left{display:flex;align-items:center;gap:16px}
+  .logo{width:48px;height:48px;background:#00a99d;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;color:#fff;letter-spacing:-1px;flex-shrink:0}
+  .header-title h1{font-size:1.4rem;font-weight:700;margin-bottom:2px}
+  .header-title p{font-size:0.82rem;opacity:.8}
+  .header-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+  .period-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:6px 14px;font-size:0.8rem}
+  .period-val{font-weight:700;font-size:1rem;margin-top:2px}
+  .btn-group{display:flex;gap:8px;flex-wrap:wrap}
+  .update-btn,.online-btn{display:inline-flex;align-items:center;gap:6px;border-radius:8px;padding:7px 16px;font-size:0.82rem;font-weight:600;cursor:pointer;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;text-decoration:none;transition:all .2s}
+  .update-btn:hover,.online-btn:hover{background:rgba(255,255,255,.28);border-color:#fff}
+  .update-btn svg,.online-btn svg{width:15px;height:15px}
+  #updateStatus{font-size:0.78rem;color:rgba(255,255,255,.85);background:rgba(0,0,0,.25);border-radius:6px;padding:6px 12px;display:none}
+  .content{max-width:1300px;margin:0 auto;padding:24px 16px}
+  .filter-bar{background:#fff;border-radius:12px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+  .filter-bar label{font-size:0.85rem;color:#64748b;font-weight:500}
+  .filter-bar select{border:1px solid #e2e8f0;border-radius:6px;padding:6px 12px;font-size:0.85rem;background:#f8fafc;cursor:pointer}
+  #filterInfo{font-size:0.8rem;color:#94a3b8;margin-left:auto}
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+  .kpi-card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid #0e2d5e;position:relative;overflow:hidden}
+  .kpi-card::after{content:'';position:absolute;right:-12px;bottom:-12px;width:70px;height:70px;border-radius:50%;background:rgba(14,45,94,.06)}
+  .kpi-label{font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;color:#64748b;font-weight:600;margin-bottom:6px}
+  .kpi-value{font-size:1.85rem;font-weight:800;color:#0e2d5e;line-height:1}
+  .kpi-sub{font-size:0.75rem;color:#94a3b8;margin-top:4px}
+  .kpi-card:nth-child(2){border-left-color:#00a99d}.kpi-card:nth-child(2) .kpi-value{color:#00a99d}
+  .kpi-card:nth-child(3){border-left-color:#e05a2b}.kpi-card:nth-child(3) .kpi-value{color:#e05a2b}
+  .kpi-card:nth-child(4){border-left-color:#7c3aed}.kpi-card:nth-child(4) .kpi-value{color:#7c3aed}
+  .kpi-card:nth-child(5){border-left-color:#059669}.kpi-card:nth-child(5) .kpi-value{color:#059669}
+  .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+  .chart-card,.table-card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+  .chart-card h3,.table-card h3{font-size:0.95rem;font-weight:700;color:#0e2d5e;margin-bottom:4px}
+  .chart-card p,.table-card p{font-size:0.78rem;color:#94a3b8;margin-bottom:14px}
+  .chart-wrap{position:relative}
+  .full-width{grid-column:1/-1}
+  table{width:100%;border-collapse:collapse;font-size:0.83rem}
+  thead th{background:#f8fafc;padding:10px 12px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b;border-bottom:2px solid #e2e8f0}
+  tbody tr:hover{background:#f8fafc}
+  tbody td{padding:10px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+  .rank-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;font-size:0.8rem;font-weight:700;color:#fff}
+  .tech-avatar{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;font-size:0.75rem;font-weight:700;color:#fff;margin-right:8px}
+  .prod-bar{height:6px;border-radius:3px;background:#e2e8f0;overflow:hidden;margin-top:4px}
+  .prod-bar-fill{height:100%;border-radius:3px;transition:width .6s}
+  .footer{text-align:center;font-size:0.75rem;color:#94a3b8;padding:20px;margin-top:8px}
+  @media(max-width:700px){.charts-row{grid-template-columns:1fr}.header{padding:20px 16px}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">PX</div>
+    <div class="header-title">
+      <h1>KPI Produtividade Equipes Externas</h1>
+      <p>Proxxima Telecom — PMO · Board Monday.com</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="period-badge">
+      <div style="opacity:.75;font-size:.75rem">PERÍODO ANALISADO</div>
+      <div class="period-val" id="periodDisplay">Fev–Jun/2026</div>
+    </div>
+    <div class="btn-group">
+      <a href="https://romarioproxxima.github.io/dashboard-kpi-pmo/" target="_blank" class="online-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10A15.3 15.3 0 0 1 8 12a15.3 15.3 0 0 1 4-10z"/></svg>
+        Ver Online
+      </a>
+      <button class="update-btn" onclick="requestUpdate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M4 9a8 8 0 0 1 14.93-2M20 15a8 8 0 0 1-14.93 2"/></svg>
+        Atualizar Dados
+      </button>
+    </div>
+    <div id="updateStatus"></div>
+    <div style="font-size:.72rem;opacity:.6">Atualizado em <span id="lastUpdate">03/06/2026 12:01</span></div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <label>🗓 Filtrar por mês:</label>
+    <select id="monthFilter"></select>
+    <span id="filterInfo"></span>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Produtividade Total</div>
+      <div class="kpi-value" id="kpiProd">0</div>
+      <div class="kpi-sub">pontos acumulados</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Postes Auditados</div>
+      <div class="kpi-value" id="kpiPostes">0</div>
+      <div class="kpi-sub">postes vistoriados</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Técnicos Ativos</div>
+      <div class="kpi-value" id="kpiTecnicos">0</div>
+      <div class="kpi-sub">no período</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Registros</div>
+      <div class="kpi-value" id="kpiReg">0</div>
+      <div class="kpi-sub">dias trabalhados</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Média por Registro</div>
+      <div class="kpi-value" id="kpiMedia">0</div>
+      <div class="kpi-sub">pontos/dia médio</div>
+    </div>
+  </div>
+
+  <!-- Charts row 1 -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3>Produtividade por Técnico</h3>
+      <p id="techSubtitle">Total acumulado — pontos</p>
+      <div class="chart-wrap" style="height:260px"><canvas id="chartTechs"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Tipo de Serviço</h3>
+      <p>Distribuição dos registros por categoria</p>
+      <div class="chart-wrap" style="height:260px"><canvas id="chartServ"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Charts row 2 -->
+  <div class="charts-row">
+    <div class="chart-card full-width">
+      <h3>Evolução Mensal da Produtividade</h3>
+      <p id="evolSubtitle">Pontos por técnico ao longo dos meses</p>
+      <div class="chart-wrap" style="height:280px"><canvas id="chartEvol"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Ranking Table -->
+  <div class="table-card" style="margin-bottom:20px">
+    <h3>Ranking de Produtividade</h3>
+    <p>Classificação por pontuação total acumulada · Fórmula: postes×2.5 + CTOs×8 + horas_extras×111 + ...</p>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Técnico</th><th>Produtividade</th><th>Postes</th><th>Registros</th><th>Média/dia</th></tr>
+      </thead>
+      <tbody id="rankingBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Recent entries -->
+  <div class="table-card" style="margin-bottom:20px">
+    <h3>Registros Recentes</h3>
+    <p>Últimos 20 lançamentos do formulário</p>
+    <table>
+      <thead>
+        <tr><th>Data</th><th>Técnico</th><th>Serviço</th><th>Postes</th><th>Produtividade</th></tr>
+      </thead>
+      <tbody id="recentBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">Proxxima Telecomunicações &nbsp;·&nbsp; KPI PMO — Produtividade Equipes Externas &nbsp;·&nbsp; Dados: Monday.com Board 6570366248</div>
+
+<script>
+// ── DATASET ───────────────────────────────────────────────────────────────────
+const records = [{"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-05", "servico": "Auditoria de postes, Auditoria de projeto FTTH", "n1": 96, "prod": 462}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-06", "servico": "Auditoria de projeto FTTH", "n1": 0, "prod": 590}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-10", "servico": "Auditoria de projeto FTTH", "n1": 69, "prod": 616.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-23", "servico": "Auditoria de projeto FTTH, Outros", "n1": 0, "prod": 777}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-24", "servico": "Auditoria de projeto FTTH, Outros", "n1": 482, "prod": 1582.4}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-25", "servico": "Auditoria de projeto FTTH, Outros", "n1": 205, "prod": 634.6}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-13", "servico": "Auditoria de projeto FTTH", "n1": 226, "prod": 1009}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-14", "servico": "Auditoria de projeto FTTH", "n1": 0, "prod": 721.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-15", "servico": "Auditoria de projeto FTTH, Vistoria predial", "n1": 360, "prod": 1427.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-16", "servico": "Auditoria de projeto FTTH", "n1": 0, "prod": 721.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-17", "servico": "Auditoria de projeto FTTH", "n1": 300, "prod": 1194}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-17", "servico": "Auditoria de projeto FTTH", "n1": 0, "prod": 166.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-20", "servico": "Auditoria de projeto FTTH", "n1": 104, "prod": 815}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-22", "servico": "Auditoria de projeto FTTH", "n1": 440, "prod": 1449.65}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-23", "servico": "Auditoria de projeto FTTH", "n1": 560, "prod": 1544.3}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-24", "servico": "Auditoria de projeto FTTH", "n1": 435, "prod": 1431.6}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-27", "servico": "Auditoria de projeto FTTH", "n1": 360, "prod": 1155.3}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-27", "servico": "Auditoria de projeto FTTH", "n1": 355, "prod": 1220.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-28", "servico": "Auditoria de projeto FTTH, Outros", "n1": 0, "prod": 0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-29", "servico": "Auditoria de projeto FTTH", "n1": 0, "prod": 266.4}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-30", "servico": "Auditoria de projeto FTTH", "n1": 0, "prod": 0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-04", "servico": "Auditoria de projeto FTTH", "n1": 0, "prod": 444}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-05", "servico": "Auditoria de projeto FTTH", "n1": 390, "prod": 1119.3}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-06", "servico": "Auditoria de projeto FTTH", "n1": 0, "prod": 444}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-07", "servico": "Auditoria de projeto FTTH", "n1": 288, "prod": 1197.3}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-08", "servico": "Auditoria de projeto FTTH", "n1": 103, "prod": 923.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-11", "servico": "Auditoria de projeto FTTH", "n1": 0, "prod": 0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-12", "servico": "Auditoria de projeto FTTH", "n1": 512, "prod": 1835}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-13", "servico": "Outros", "n1": 0, "prod": 222}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-14", "servico": "Auditoria de projeto FTTH", "n1": 0, "prod": 347}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-15", "servico": "Auditoria de projeto FTTH", "n1": 0, "prod": 222}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-18", "servico": "Auditoria de projeto FTTH", "n1": 62, "prod": 502}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-19", "servico": "Auditoria de projeto FTTH", "n1": 261, "prod": 874.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-20", "servico": "Auditoria de projeto FTTH", "n1": 304, "prod": 1026.4}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-21", "servico": "Auditoria de projeto FTTH", "n1": 903, "prod": 2501.7}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-22", "servico": "Auditoria de projeto FTTH", "n1": 62, "prod": 488}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-25", "servico": "Auditoria de projeto FTTH", "n1": 0, "prod": 444}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-26", "servico": "Auditoria de projeto FTTH", "n1": 180, "prod": 672}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-27", "servico": "Auditoria de projeto FTTH", "n1": 398, "prod": 1239.2}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-28", "servico": "Auditoria de projeto FTTH", "n1": 351, "prod": 877.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-28", "servico": "Auditoria de projeto FTTH", "n1": 17, "prod": 42.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-29", "servico": "Outros", "n1": 0, "prod": 0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-13", "servico": "Outros", "n1": 0, "prod": 111}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-14", "servico": "Vistoria predial", "n1": 0, "prod": 236}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-15", "servico": "Outros", "n1": 0, "prod": 0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-18", "servico": "Auditoria de postes", "n1": 18, "prod": 189.3}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-19", "servico": "Auditoria de postes, Auditoria de projeto FTTH", "n1": 78, "prod": 442.1}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-19", "servico": "Auditoria de postes, Auditoria de projeto FTTH", "n1": 82, "prod": 427}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-20", "servico": "Auditoria de postes, Auditoria de projeto FTTH", "n1": 88, "prod": 775}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-21", "servico": "Auditoria de projeto FTTH, Auditoria de postes", "n1": 233, "prod": 1170.8}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-22", "servico": "Auditoria de postes, Auditoria de projeto FTTH", "n1": 150, "prod": 1041}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-25", "servico": "Outros", "n1": 0, "prod": 666}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-26", "servico": "Auditoria de postes, Auditoria de projeto FTTH", "n1": 228, "prod": 792}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-26", "servico": "Auditoria de postes, Auditoria de projeto FTTH", "n1": 228, "prod": 792}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-26", "servico": "Auditoria de postes, Auditoria de projeto FTTH", "n1": 228, "prod": 792}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-27", "servico": "Outros", "n1": 0, "prod": 0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-28", "servico": "Auditoria de postes, Auditoria de projeto FTTH", "n1": 55, "prod": 359.5}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-28", "servico": "Outros", "n1": 0, "prod": 1611}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-29", "servico": "Outros", "n1": 0, "prod": 0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-01", "servico": "Auditoria de postes, Auditoria de projeto FTTH", "n1": 131, "prod": 327.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-01", "servico": "Auditoria de projeto FTTH", "n1": 0, "prod": 0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-01", "servico": "Auditoria de projeto FTTH", "n1": 93, "prod": 232.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-01", "servico": "Auditoria de projeto FTTH", "n1": 265, "prod": 662.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-01", "servico": "Auditoria de projeto FTTH", "n1": 95, "prod": 237.5}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-01", "servico": "Auditoria de postes", "n1": 0, "prod": 0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-02", "servico": "Auditoria de postes", "n1": 0, "prod": 0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-02", "servico": "Auditoria de projeto FTTH", "n1": 241, "prod": 602.5}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-02", "servico": "Outros", "n1": 0, "prod": 0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-02", "servico": "Auditoria de projeto FTTH", "n1": 0, "prod": 0}];
+
+const MONTH_NAMES = {'2026-02':'Fev/26','2026-03':'Mar/26','2026-04':'Abr/26','2026-05':'Mai/26','2026-06':'Jun/26','2026-07':'Jul/26'};
+const MONTH_FULL  = {'2026-02':'Fevereiro/2026','2026-03':'Março/2026','2026-04':'Abril/2026','2026-05':'Maio/2026','2026-06':'Junho/2026','2026-07':'Julho/2026'};
+const COLORS = ['#0e2d5e','#00a99d','#e05a2b','#7c3aed','#dc2626','#0891b2','#059669','#d97706'];
+const SERV_COLORS = ['#0e2d5e','#00a99d','#e05a2b','#7c3aed','#dc2626','#0891b2','#059669','#d97706','#f59e0b','#94a3b8','#64748b'];
+
+function getMonth(d){ return d.slice(0,7); }
+const allMonths = [...new Set(records.map(r=>getMonth(r.data5)))].sort();
+
+// Populate month filter
+const sel = document.getElementById('monthFilter');
+const opt0 = document.createElement('option'); opt0.value='all'; opt0.textContent='Todos os meses'; sel.appendChild(opt0);
+allMonths.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=MONTH_FULL[m]||m; sel.appendChild(o); });
+sel.value = allMonths[allMonths.length-1];
+
+let chartTechs, chartServ, chartEvol;
+
+function render(selMonth){
+  const recs = selMonth==='all' ? records : records.filter(r=>getMonth(r.data5)===selMonth);
+
+  // Aggregations
+  const techMap = {};
+  const servMap = {};
+  recs.forEach(r=>{
+    if(!techMap[r.tecnico]) techMap[r.tecnico]={prod:0,postes:0,count:0};
+    techMap[r.tecnico].prod   += r.prod;
+    techMap[r.tecnico].postes += r.n1;
+    techMap[r.tecnico].count  += 1;
+    r.servico.split(', ').forEach(s=>{ servMap[s]=(servMap[s]||0)+1; });
+  });
+
+  const techs = Object.entries(techMap).sort((a,b)=>b[1].prod-a[1].prod);
+  const totalProd = recs.reduce((s,r)=>s+r.prod,0);
+  const totalPostes = recs.reduce((s,r)=>s+r.n1,0);
+
+  // KPIs
+  document.getElementById('kpiProd').textContent = totalProd.toLocaleString('pt-BR',{maximumFractionDigits:0});
+  document.getElementById('kpiPostes').textContent = totalPostes.toLocaleString('pt-BR');
+  document.getElementById('kpiTecnicos').textContent = techs.length;
+  document.getElementById('kpiReg').textContent = recs.length;
+  document.getElementById('kpiMedia').textContent = recs.length ? Math.round(totalProd/recs.length).toLocaleString('pt-BR') : '0';
+
+  // Period display
+  const periodEl = document.getElementById('periodDisplay');
+  const infoEl = document.getElementById('filterInfo');
+  if(selMonth==='all'){
+    periodEl.textContent = 'Fev–Jun/2026';
+    infoEl.textContent = recs.length + ' registros · ' + allMonths.length + ' meses';
+  } else {
+    periodEl.textContent = MONTH_FULL[selMonth]||selMonth;
+    infoEl.textContent = recs.length + ' registros neste mês';
+  }
+
+  // Chart 1: Produtividade por técnico
+  if(chartTechs) chartTechs.destroy();
+  chartTechs = new Chart(document.getElementById('chartTechs'),{
+    type:'bar',
+    data:{
+      labels: techs.map(t=>t[0].split(' ').slice(0,2).join(' ')),
+      datasets:[{
+        label:'Produtividade',
+        data: techs.map(t=>Math.round(t[1].prod)),
+        backgroundColor: techs.map((_,i)=>COLORS[i%COLORS.length]),
+        borderRadius:8, borderSkipped:false
+      }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.parsed.x.toLocaleString('pt-BR')+' pts'}}},
+      scales:{x:{grid:{color:'#eef0f3'}},y:{grid:{display:false}}}
+    }
+  });
+
+  // Chart 2: Tipo de serviço
+  const servEntries = Object.entries(servMap).sort((a,b)=>b[1]-a[1]);
+  if(chartServ) chartServ.destroy();
+  chartServ = new Chart(document.getElementById('chartServ'),{
+    type:'doughnut',
+    data:{
+      labels: servEntries.map(s=>s[0]),
+      datasets:[{data:servEntries.map(s=>s[1]),backgroundColor:SERV_COLORS,hoverOffset:8}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{font:{size:11},padding:10}}}
+    }
+  });
+
+  // Chart 3: Evolução mensal
+  const months = selMonth==='all' ? allMonths : [selMonth];
+  const techsSorted = techs.map(t=>t[0]);
+  const datasets = techsSorted.map((tech,i)=>{
+    const color = COLORS[i%COLORS.length];
+    return {
+      label: tech.split(' ').slice(0,2).join(' '),
+      data: months.map(m=>{ const r=records.filter(x=>x.tecnico===tech&&getMonth(x.data5)===m); return Math.round(r.reduce((s,x)=>s+x.prod,0)); }),
+      backgroundColor: color+'55', borderColor: color, borderWidth:2.5, tension:0.3, fill:true
+    };
+  });
+  if(chartEvol) chartEvol.destroy();
+  chartEvol = new Chart(document.getElementById('chartEvol'),{
+    type: months.length===1 ? 'bar' : 'line',
+    data:{ labels:months.map(m=>MONTH_NAMES[m]||m), datasets },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:11}}}},
+      scales:{
+        x:{grid:{display:false}},
+        y:{grid:{color:'#eef0f3'},ticks:{callback:v=>v.toLocaleString('pt-BR')}}
+      }
+    }
+  });
+
+  // Ranking table
+  const maxProd = techs[0]?.[1].prod || 1;
+  document.getElementById('rankingBody').innerHTML = techs.map(([tech,d],i)=>{
+    const color = COLORS[i%COLORS.length];
+    const pct = Math.round((d.prod/maxProd)*100);
+    const medals=['🥇','🥈','🥉'];
+    const initials = tech.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('');
+    return `<tr>
+      <td><span class="rank-badge" style="background:${['#f59e0b','#94a3b8','#cd7f32'][i]||'#e2e8f0'}">${medals[i]||i+1}</span></td>
+      <td><span class="tech-avatar" style="background:${color}">${initials}</span>${tech}</td>
+      <td>
+        <strong>${Math.round(d.prod).toLocaleString('pt-BR')}</strong> pts
+        <div class="prod-bar"><div class="prod-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      </td>
+      <td>${d.postes.toLocaleString('pt-BR')}</td>
+      <td>${d.count}</td>
+      <td>${Math.round(d.prod/d.count).toLocaleString('pt-BR')}</td>
+    </tr>`;
+  }).join('');
+
+  // Recent entries table
+  const recent = [...recs].sort((a,b)=>b.data5.localeCompare(a.data5)).slice(0,20);
+  document.getElementById('recentBody').innerHTML = recent.map(r=>{
+    const d=r.data5; const df=`${d.slice(8,10)}/${d.slice(5,7)}/${d.slice(0,4)}`;
+    const tIdx = Object.keys(techMap).indexOf(r.tecnico);
+    const color = COLORS[tIdx>=0?tIdx:0];
+    const initials = r.tecnico.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('');
+    return `<tr>
+      <td>${df}</td>
+      <td><span class="tech-avatar" style="background:${color};font-size:.65rem">${initials}</span>${r.tecnico.split(' ').slice(0,2).join(' ')}</td>
+      <td style="color:#64748b">${r.servico.slice(0,45)}</td>
+      <td>${r.n1||'—'}</td>
+      <td><strong style="color:#0e2d5e">${r.prod.toLocaleString('pt-BR',{maximumFractionDigits:1})}</strong></td>
+    </tr>`;
+  }).join('');
+}
+
+sel.addEventListener('change', ()=>render(sel.value));
+render(sel.value);
+
+// ── Update button ─────────────────────────────────────────────────────────────
+function requestUpdate(){
+  const btn = document.querySelector('.update-btn');
+  const status = document.getElementById('updateStatus');
+  btn.disabled=true;
+  btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="animation:spin 1s linear infinite"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M4 9a8 8 0 0 1 14.93-2M20 15a8 8 0 0 1-14.93 2"/></svg> Aguardando...';
+  if(typeof sendPrompt==='function'){
+    sendPrompt('atualizar dashboard kpi pmo produtividade');
+    status.style.display='block';
+    status.textContent='Comando enviado ao Claude. Aguarde a atualização...';
+  } else if(window.cowork&&typeof window.cowork.sendPrompt==='function'){
+    window.cowork.sendPrompt('atualizar dashboard kpi pmo produtividade');
+    status.style.display='block';
+    status.textContent='Comando enviado ao Claude. Aguarde a atualização...';
+  } else {
+    status.style.display='block';
+    status.innerHTML='Copie e cole no Claude: <strong>atualizar dashboard kpi pmo produtividade</strong>';
+  }
+  setTimeout(()=>{ btn.disabled=false; btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M4 9a8 8 0 0 1 14.93-2M20 15a8 8 0 0 1-14.93 2"/></svg> Atualizar Dados'; },5000);
+}
+</script>
+</body>
+</html>
