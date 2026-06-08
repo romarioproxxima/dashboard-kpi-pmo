@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KPI Produtividade Equipes Externas - PMO Proxxima</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1e293b}
@@ -36,6 +37,25 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1e293b}
 .audit-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;border:1.5px solid #d97706;background:#fffbeb;color:#b45309;transition:all .2s;white-space:nowrap;margin-left:auto}
 .audit-btn:hover{background:#fef3c7;border-color:#b45309}
 .audit-btn svg{width:15px;height:15px}
+.kmz-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;border:1.5px solid #059669;background:#ecfdf5;color:#065f46;transition:all .2s;white-space:nowrap}
+.kmz-btn:hover{background:#d1fae5;border-color:#065f46}
+.kmz-btn svg{width:15px;height:15px}
+.kmz-loading{padding:32px;text-align:center;color:#64748b;font-size:0.9rem;display:flex;flex-direction:column;align-items:center;gap:8px}
+.kmz-spin{font-size:1.6rem;display:inline-block;animation:spin 1.5s linear infinite}
+.kmz-record{padding:14px 0}
+.kmz-record-header{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;padding:10px 14px;background:#f8fafc;border-radius:8px;border-left:3px solid #059669}
+.kmz-record-num{font-size:0.72rem;font-weight:800;color:#fff;background:#059669;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kmz-record-name{font-weight:700;color:#0e2d5e;font-size:0.88rem}
+.kmz-record-date{font-size:0.78rem;color:#64748b;background:#e2e8f0;border-radius:4px;padding:2px 8px}
+.kmz-record-file{font-size:0.74rem;color:#059669;margin-left:auto;font-style:italic}
+.kmz-segments{margin-top:8px;padding:8px 12px;background:#f0fdf4;border-radius:6px;border:1px solid #bbf7d0}
+.kmz-segment{font-size:0.78rem;color:#065f46;padding:2px 0;line-height:1.5}
+.kmz-divider{border:none;border-top:1px solid #f1f5f9;margin:4px 0}
+.kmz-error-inline{background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:10px 14px;color:#b91c1c;font-size:0.82rem;margin-top:8px}
+.status-ok{color:#059669;font-weight:700;background:#f0fdf4;border-radius:4px;padding:2px 8px;font-size:0.78rem;white-space:nowrap}
+.status-warn{color:#b45309;font-weight:700;background:#fffbeb;border-radius:4px;padding:2px 8px;font-size:0.78rem;white-space:nowrap}
+.status-missing{color:#6b7280;font-weight:600;background:#f9fafb;border-radius:4px;padding:2px 8px;font-size:0.78rem;white-space:nowrap}
+.kmz-notice{margin-top:12px;padding:10px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;font-size:0.8rem;color:#1e40af;line-height:1.5}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px}
 .kpi-card{background:#fff;border-radius:14px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid #0e2d5e;position:relative;overflow:hidden}
 .kpi-card::after{content:'';position:absolute;right:-12px;bottom:-12px;width:70px;height:70px;border-radius:50%;background:rgba(14,45,94,.06)}
@@ -178,6 +198,26 @@ tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
   </div>
 </div>
 
+<!-- MODAL AUDITORIA KMZ -->
+<div class="modal-overlay" id="kmzOverlay" onclick="if(event.target===this)closeKmzModal()">
+  <div class="modal" style="width:min(860px,100%)">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">&#128269; Auditoria KMZ &#8212; Verificação de Itens Declarados</div>
+        <div class="modal-subtitle" id="kmzSubtitle">Iniciando análise...</div>
+      </div>
+      <button class="modal-close" onclick="closeKmzModal()">&#215;</button>
+    </div>
+    <div class="modal-body" id="kmzModalBody">
+      <div class="kmz-loading"><span class="kmz-spin">&#9881;</span>Aguardando...</div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-footer-note" id="kmzFooterNote">Board: 6570366248 &middot; Tolerância: ±20%</div>
+      <button class="btn-copy" onclick="closeKmzModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div class="content">
   <div class="filter-bar">
     <label>&#128197; Filtrar por mes:</label>
@@ -186,6 +226,10 @@ tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
     <button class="audit-btn" onclick="openAuditModal()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       Auditoria de Rotas
+    </button>
+    <button class="kmz-btn" onclick="openKmzAuditModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10H3"/><path d="M21 6H3"/><path d="M21 14H3"/><path d="M21 18H3"/><circle cx="9" cy="14" r="3" fill="#059669" stroke="none"/><path d="M9 11v6M6 14h6" stroke="#fff" stroke-width="2"/></svg>
+      Auditoria KMZ
     </button>
   </div>
   <div class="formula-note">
@@ -343,17 +387,15 @@ function openAuditModal(){
       +'<td><span class="time-badge">'+fmtMins(r.desl_mins)+'</span><span class="pts-badge">'+dpts.toLocaleString('pt-BR')+' pts</span></td>'
       +'<td><span class="status-pending">&#9202; Pendente</span></td></tr>';
   }).join('');
-  document.getElementById('promptBox').style.display='none';
   document.getElementById('auditFooterNote').textContent='Board: 6570366248  Tolerancia: +/-20%';
   document.getElementById('auditOverlay').classList.add('open');
   document.body.style.overflow='hidden';
 }
-
 function closeAuditModal(){
   document.getElementById('auditOverlay').classList.remove('open');
   document.body.style.overflow='';
 }
-
+function fmtMins(m){const h=Math.floor(m/60),mn=m%60;return h+'h'+(mn>0?mn+'min':'');}
 function buildAuditPrompt(){
   const lines=currentSample.map((r,i)=>{
     const d=r.data5,df=d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4);
@@ -362,21 +404,15 @@ function buildAuditPrompt(){
   });
   return 'Auditoria de deslocamento por amostragem - PMO Proxxima\nBoard Monday.com: 6570366248\n\nRegistros sorteados para conferencia com KMZ:\n'+lines.join('\n')+'\n\nPara cada registro:\n1. Acesse o item no board Monday.com (filtrar por data + colaborador)\n2. Baixe o arquivo KMZ anexado ao item\n3. Calcule distancia e tempo real da rota GPS\n4. Compare com o tempo declarado (tolerancia +/-20%)\n5. Sinalize OK ou ALERTA para cada registro\n6. Apresente resumo da auditoria com status de cada item';
 }
-
 function copyPrompt(){
   const p=buildAuditPrompt();
-  document.getElementById('promptBox').textContent=p;
-  document.getElementById('promptBox').style.display='block';
-  if(navigator.clipboard) navigator.clipboard.writeText(p);
+  if(navigator.clipboard)navigator.clipboard.writeText(p);
   const btn=document.getElementById('btnCopy');
   btn.textContent='Copiado!';
   setTimeout(()=>{btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar Prompt';},2000);
 }
-
 function sendAuditToClaud(){
   const p=buildAuditPrompt();
-  document.getElementById('promptBox').textContent=p;
-  document.getElementById('promptBox').style.display='block';
   if(typeof sendPrompt==='function'){ sendPrompt(p); closeAuditModal(); }
   else if(window.cowork&&typeof window.cowork.sendPrompt==='function'){ window.cowork.sendPrompt(p); closeAuditModal(); }
   else {
@@ -384,6 +420,154 @@ function sendAuditToClaud(){
     document.getElementById('auditFooterNote').textContent='Prompt copiado - cole no chat do Claude para iniciar a verificacao';
   }
 }
+
+/* ===== AUDITORIA KMZ ===== */
+function havDist(lat1,lon1,lat2,lon2){
+  const R=6371,r=Math.PI/180;
+  const dLat=(lat2-lat1)*r,dLon=(lon2-lon1)*r;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function parseKmlCoords(txt){
+  const pts=[];
+  txt.trim().split(/\s+/).forEach(t=>{
+    const p=t.split(',');
+    if(p.length>=2){const lon=+p[0],lat=+p[1];if(!isNaN(lat)&&!isNaN(lon))pts.push([lat,lon]);}
+  });
+  return pts;
+}
+function kmlPolyDist(pts){let d=0;for(let i=0;i<pts.length-1;i++)d+=havDist(pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1]);return d;}
+function analyzeKml(kmlText){
+  const doc=new DOMParser().parseFromString(kmlText,'text/xml');
+  const pms=doc.querySelectorAll('Placemark');
+  let lines=[],points=0,totalKm=0;
+  pms.forEach(pm=>{
+    const name=(pm.querySelector('name')||{textContent:'?'}).textContent.trim();
+    const ls=pm.querySelector('LineString');
+    if(ls){const ce=ls.querySelector('coordinates');if(ce){const pts=parseKmlCoords(ce.textContent);const d=kmlPolyDist(pts);totalKm+=d;lines.push({name,pts:pts.length,km:Math.round(d*100)/100});}}
+    if(pm.querySelector('Point'))points++;
+  });
+  return{lines,points,totalKm:Math.round(totalKm*100)/100};
+}
+async function downloadAndParseKmz(url){
+  const resp=await fetch(url,{mode:'cors'});
+  if(!resp.ok)throw new Error('HTTP '+resp.status);
+  const ab=await resp.arrayBuffer();
+  if(typeof JSZip==='undefined')throw new Error('JSZip nao carregado');
+  const zip=await JSZip.loadAsync(ab);
+  const kmlEntry=Object.values(zip.files).find(f=>f.name.toLowerCase().endsWith('.kml')&&!f.dir);
+  if(!kmlEntry)throw new Error('KML nao encontrado no ZIP');
+  const kmlText=await kmlEntry.async('string');
+  return analyzeKml(kmlText);
+}
+function colText(item,id){const cv=(item.column_values||[]).find(c=>c.id===id);return cv&&cv.text?cv.text:'';}
+function colNum(item,id){const t=colText(item,id);return t?parseFloat(t)||0:0;}
+function fmtStatus(declared,kmzVal,unit){
+  if(declared===0&&kmzVal===0)return'';
+  if(declared===0)return'<span class="status-missing">&#9888; Nao preenchido (KMZ: '+kmzVal+unit+')</span>';
+  const diff=Math.abs(kmzVal-declared)/declared;
+  if(diff<=0.20)return'<span class="status-ok">&#10003; OK</span>';
+  if(kmzVal>declared*1.20)return'<span class="status-warn">&#9650; KMZ maior ('+Math.round(diff*100)+'%)</span>';
+  return'<span class="status-warn">&#9660; KMZ menor ('+Math.round(diff*100)+'%)</span>';
+}
+function renderKmzResults(results){
+  let html='';
+  results.forEach((r,idx)=>{
+    const d=r.declared,kmz=r.kmz,error=r.error;
+    html+='<div class="kmz-record">';
+    html+='<div class="kmz-record-header">';
+    html+='<span class="kmz-record-num">'+(idx+1)+'</span>';
+    html+='<span class="kmz-record-name">'+d.tecnico+'</span>';
+    const dd=d.data,df=dd.length===10?dd.slice(8,10)+'/'+dd.slice(5,7)+'/'+dd.slice(0,4):dd;
+    html+='<span class="kmz-record-date">'+df+'</span>';
+    html+='<span class="kmz-record-file">&#128206; '+d.fileName+'</span>';
+    html+='</div>';
+    if(error){
+      html+='<div class="kmz-error-inline">&#10060; Erro ao processar KMZ: '+error+'</div>';
+    }else{
+      html+='<table class="audit-table"><thead><tr><th>Metrica</th><th>Declarado</th><th>KMZ Real</th><th>Status</th></tr></thead><tbody>';
+      if(d.postes>0||kmz.points>0)
+        html+='<tr class="audit-row"><td><strong>Postes</strong></td><td>'+(d.postes||'&#8212;')+'</td><td>'+kmz.points+'</td><td>'+fmtStatus(d.postes,kmz.points,'')+'</td></tr>';
+      if(d.cabos>0||kmz.totalKm>0)
+        html+='<tr class="audit-row"><td><strong>Cabos (km)</strong></td><td>'+(d.cabos||'&#8212;')+' km</td><td>'+kmz.totalKm+' km</td><td>'+fmtStatus(d.cabos,kmz.totalKm,' km')+'</td></tr>';
+      if(d.ceos>0)
+        html+='<tr class="audit-row"><td><strong>CEOs</strong></td><td>'+d.ceos+'</td><td>&#8212; ver notas</td><td><span class="status-missing">&#128204; Verificar notas</span></td></tr>';
+      if(d.ctos>0)
+        html+='<tr class="audit-row"><td><strong>CTOs</strong></td><td>'+d.ctos+'</td><td>&#8212; ver notas</td><td><span class="status-missing">&#128204; Verificar notas</span></td></tr>';
+      html+='</tbody></table>';
+      if(kmz.lines.length>0){
+        html+='<div class="kmz-segments">';
+        kmz.lines.forEach(l=>{html+='<div class="kmz-segment">&#128205; <strong>'+l.name+'</strong> &mdash; '+l.km+' km &middot; '+l.pts+' pts GPS</div>';});
+        html+='</div>';
+      }
+      if(d.desl)html+='<div class="kmz-notice">&#128652; <strong>Deslocamento:</strong> '+d.desl+'</div>';
+    }
+    html+='</div>';
+    if(idx<results.length-1)html+='<hr class="kmz-divider">';
+  });
+  document.getElementById('kmzModalBody').innerHTML=html;
+  document.getElementById('kmzSubtitle').textContent=results.length+' registro(s) analisado(s) — '+new Date().toLocaleTimeString('pt-BR');
+}
+async function openKmzAuditModal(){
+  document.getElementById('kmzOverlay').classList.add('open');
+  document.getElementById('kmzSubtitle').textContent='Buscando itens no Monday.com...';
+  document.getElementById('kmzModalBody').innerHTML='<div class="kmz-loading"><span class="kmz-spin">&#9881;</span><span>Buscando dados do Monday.com...</span></div>';
+  document.getElementById('kmzFooterNote').textContent='Board: 6570366248 · Tolerancia: ±20%';
+  try{
+    if(!window.cowork||typeof window.cowork.callMcpTool!=='function')throw new Error('__no_cowork__');
+    const boardR=await window.cowork.callMcpTool('mcp__f2ceae86-18da-4512-8c3d-c4451a45c7f8__get_board_items_page',{board_id:'6570366248',limit:50});
+    const boardData=boardR.structuredContent??(JSON.parse(boardR.content[0].text));
+    const items=(boardData.boards&&boardData.boards[0]&&boardData.boards[0].items_page&&boardData.boards[0].items_page.items)||boardData.items||[];
+    const withKmz=items.filter(it=>{
+      const fc=(it.column_values||[]).find(c=>c.id==='enviar_arquivo');
+      if(!fc||!fc.value)return false;
+      try{const fd=JSON.parse(fc.value);return fd.files&&fd.files.length>0;}catch{return false;}
+    });
+    if(withKmz.length===0)throw new Error('Nenhum item com KMZ encontrado no board');
+    const shuffled=[...withKmz].sort(()=>Math.random()-.5);
+    const sz=Math.min(3,Math.max(1,Math.ceil(withKmz.length*0.3)));
+    const sample=shuffled.slice(0,sz);
+    document.getElementById('kmzSubtitle').textContent=sz+' de '+withKmz.length+' itens selecionados';
+    document.getElementById('kmzModalBody').innerHTML='<div class="kmz-loading"><span class="kmz-spin">&#9881;</span><span>Baixando e analisando KMZ ('+sz+' arquivo(s))...</span></div>';
+    const results=[];
+    for(const item of sample){
+      const fc=(item.column_values||[]).find(c=>c.id==='enviar_arquivo');
+      const fd=JSON.parse(fc.value);
+      const assetId=String(fd.files[0].assetId||fd.files[0].id);
+      const declared={
+        tecnico:colText(item,'sele__o_individual__1')||item.name,
+        data:colText(item,'data5')||'?',
+        postes:colNum(item,'n_mero1'),
+        ctos:colNum(item,'n_meros62__1'),
+        ceos:colNum(item,'numeric_mkwpbbr'),
+        cabos:colNum(item,'numeric_mm3y8gz8'),
+        desl:colText(item,'text_mm3zh5yf'),
+        fileName:fd.files[0].name
+      };
+      try{
+        const assetR=await window.cowork.callMcpTool('mcp__f2ceae86-18da-4512-8c3d-c4451a45c7f8__get_assets',{ids:[assetId]});
+        const assetData=assetR.structuredContent??(JSON.parse(assetR.content[0].text));
+        const signedUrl=assetData.results[0].public_url;
+        const kmz=await downloadAndParseKmz(signedUrl);
+        results.push({declared,kmz,error:null});
+      }catch(e){results.push({declared,kmz:null,error:e.message});}
+    }
+    renderKmzResults(results);
+    document.getElementById('kmzFooterNote').textContent='Board: 6570366248 · Amostra: '+sz+'/'+withKmz.length+' KMZs · '+new Date().toLocaleDateString('pt-BR');
+  }catch(err){
+    if(err.message==='__no_cowork__'){
+      const p='Auditoria KMZ - board Monday.com 6570366248\n\nPara os ultimos registros com arquivo KMZ anexado:\n1. Baixe os KMZ\n2. Compare postes declarados vs pontos GPS no KMZ\n3. Compare cabos declarados (km) vs distancia do backbone no KMZ\n4. Verifique CEOs/CTOs nas notas\n5. Sinalize OK ou ALERTA (tolerancia +-20%) para cada campo\n6. Mostre tabela com resultado por tecnico/data';
+      if(typeof sendPrompt==='function'){sendPrompt(p);closeKmzModal();}
+      else if(window.cowork&&window.cowork.sendPrompt){window.cowork.sendPrompt(p);closeKmzModal();}
+      else{document.getElementById('kmzModalBody').innerHTML='<div class="audit-note" style="margin:0">&#128204; Sessao Cowork nao detectada. Cole no chat do Claude:<br><br><code style="background:#f1f5f9;padding:8px;border-radius:6px;display:block;margin-top:8px;font-size:.78rem">Auditoria KMZ board 6570366248 — verificar postes, cabos km e CEOs dos registros com KMZ anexado</code></div>';
+      document.getElementById('kmzSubtitle').textContent='Use o chat do Claude para iniciar';}
+    }else{
+      document.getElementById('kmzModalBody').innerHTML='<div class="kmz-error-inline">&#10060; '+err.message+'</div>';
+      document.getElementById('kmzSubtitle').textContent='Erro na analise';
+    }
+  }
+}
+function closeKmzModal(){document.getElementById('kmzOverlay').classList.remove('open');document.body.style.overflow='';}
 
 function requestUpdate(){
   const btn=document.querySelector('.update-btn'),st=document.getElementById('updateStatus');
