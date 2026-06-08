@@ -53,9 +53,30 @@
   .footer{text-align:center;font-size:0.75rem;color:#94a3b8;padding:20px;margin-top:8px}
   @media(max-width:700px){.charts-row{grid-template-columns:1fr}.header{padding:20px 16px}}
   @keyframes spin{to{transform:rotate(360deg)}}
+  /* Tab nav */
+  .tab-nav{background:#071d3e;padding:8px 20px;display:flex;align-items:center;gap:10px}
+  .tab-nav-logo{width:28px;height:28px;background:#00a99d;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.78rem;color:#fff;letter-spacing:-1px;flex-shrink:0;margin-right:6px}
+  .tab-nav-title{color:rgba(255,255,255,.6);font-size:0.78rem;font-weight:600;margin-right:10px;white-space:nowrap}
+  .tab-nav a{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:7px;font-size:0.8rem;font-weight:600;text-decoration:none;border:1.5px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);transition:all .18s;white-space:nowrap}
+  .tab-nav a:hover{background:rgba(255,255,255,.15);color:#fff}
+  .tab-nav a.active{background:rgba(255,255,255,.92);color:#071d3e;border-color:#fff}
+  .tab-nav a svg{width:13px;height:13px}
 </style>
 </head>
 <body>
+
+<div class="tab-nav">
+  <div class="tab-nav-logo">PX</div>
+  <span class="tab-nav-title">Proxxima KPI</span>
+  <a href="https://romarioproxxima.github.io/dashboard-kpi-produtividade/">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    Aba Interna — Geogrid
+  </a>
+  <a href="https://romarioproxxima.github.io/dashboard-kpi-pmo/" class="active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10A15.3 15.3 0 0 1 8 12a15.3 15.3 0 0 1 4-10z"/></svg>
+    Aba Externa — Monday PMO
+  </a>
+</div>
 
 <div class="header">
   <div class="header-left">
@@ -322,34 +343,4 @@ function render(selMonth){
       <td><span class="tech-avatar" style="background:${color};font-size:.65rem">${initials}</span>${r.tecnico.split(' ').slice(0,2).join(' ')}</td>
       <td style="color:#64748b">${r.servico.slice(0,45)}</td>
       <td>${r.n1||'—'}</td>
-      <td><strong style="color:#0e2d5e">${r.prod.toLocaleString('pt-BR',{maximumFractionDigits:1})}</strong></td>
-    </tr>`;
-  }).join('');
-}
-
-sel.addEventListener('change', ()=>render(sel.value));
-render(sel.value);
-
-// ── Update button ─────────────────────────────────────────────────────────────
-function requestUpdate(){
-  const btn = document.querySelector('.update-btn');
-  const status = document.getElementById('updateStatus');
-  btn.disabled=true;
-  btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="animation:spin 1s linear infinite"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M4 9a8 8 0 0 1 14.93-2M20 15a8 8 0 0 1-14.93 2"/></svg> Aguardando...';
-  if(typeof sendPrompt==='function'){
-    sendPrompt('atualizar dashboard kpi pmo produtividade');
-    status.style.display='block';
-    status.textContent='Comando enviado ao Claude. Aguarde a atualização...';
-  } else if(window.cowork&&typeof window.cowork.sendPrompt==='function'){
-    window.cowork.sendPrompt('atualizar dashboard kpi pmo produtividade');
-    status.style.display='block';
-    status.textContent='Comando enviado ao Claude. Aguarde a atualização...';
-  } else {
-    status.style.display='block';
-    status.innerHTML='Copie e cole no Claude: <strong>atualizar dashboard kpi pmo produtividade</strong>';
-  }
-  setTimeout(()=>{ btn.disabled=false; btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M4 9a8 8 0 0 1 14.93-2M20 15a8 8 0 0 1-14.93 2"/></svg> Atualizar Dados'; },5000);
-}
-</script>
-</body>
-</html>
+      <td><strong style="color:#0e2d5e">${r.prod.toLocaleString('pt-BR',{maximumFract
