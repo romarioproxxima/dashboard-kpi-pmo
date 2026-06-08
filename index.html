@@ -33,17 +33,17 @@
   .filter-bar label{font-size:0.85rem;color:#64748b;font-weight:500}
   .filter-bar select{border:1px solid #e2e8f0;border-radius:6px;padding:6px 12px;font-size:0.85rem;background:#f8fafc;cursor:pointer}
   #filterInfo{font-size:0.8rem;color:#94a3b8;margin-left:auto}
-  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
-  .kpi-card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid #0e2d5e;position:relative;overflow:hidden}
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px}
+  .kpi-card{background:#fff;border-radius:14px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid #0e2d5e;position:relative;overflow:hidden}
   .kpi-card::after{content:'';position:absolute;right:-12px;bottom:-12px;width:70px;height:70px;border-radius:50%;background:rgba(14,45,94,.06)}
   .kpi-label{font-size:0.72rem;text-transform:uppercase;letter-spacing:.05em;color:#64748b;font-weight:600;margin-bottom:6px}
-  .kpi-value{font-size:1.75rem;font-weight:800;color:#0e2d5e;line-height:1}
-  .kpi-sub{font-size:0.72rem;color:#94a3b8;margin-top:4px}
+  .kpi-value{font-size:1.65rem;font-weight:800;color:#0e2d5e;line-height:1}
+  .kpi-sub{font-size:0.7rem;color:#94a3b8;margin-top:4px}
   .kpi-card:nth-child(2){border-left-color:#00a99d}.kpi-card:nth-child(2) .kpi-value{color:#00a99d}
   .kpi-card:nth-child(3){border-left-color:#e05a2b}.kpi-card:nth-child(3) .kpi-value{color:#e05a2b}
   .kpi-card:nth-child(4){border-left-color:#7c3aed}.kpi-card:nth-child(4) .kpi-value{color:#7c3aed}
   .kpi-card:nth-child(5){border-left-color:#059669}.kpi-card:nth-child(5) .kpi-value{color:#059669}
-  .kpi-card:nth-child(6){border-left-color:#0891b2}.kpi-card:nth-child(6) .kpi-value{color:#0891b2}
+  .kpi-card:nth-child(6){border-left-color:#f59e0b}.kpi-card:nth-child(6) .kpi-value{color:#f59e0b}
   .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
   .chart-card,.table-card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
   .chart-card h3,.table-card h3{font-size:0.95rem;font-weight:700;color:#0e2d5e;margin-bottom:4px}
@@ -59,8 +59,10 @@
   .tech-avatar{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:0.72rem;font-weight:700;color:#fff;margin-right:6px;flex-shrink:0}
   .prod-bar{height:5px;border-radius:3px;background:#e2e8f0;overflow:hidden;margin-top:3px}
   .prod-bar-fill{height:100%;border-radius:3px;transition:width .6s}
-  .desl-tag{font-size:0.7rem;color:#64748b;background:#f1f5f9;border-radius:4px;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;display:inline-block}
+  .desl-tag{font-size:0.7rem;color:#64748b;background:#fff8e7;border:1px solid #fde68a;border-radius:4px;padding:2px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:155px;display:inline-block}
+  .desl-pts{font-size:0.7rem;font-weight:700;color:#b45309;margin-left:3px}
   .footer{text-align:center;font-size:0.75rem;color:#94a3b8;padding:20px;margin-top:8px}
+  .formula-note{font-size:0.72rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:8px 12px;color:#166534;margin-bottom:14px}
   @media(max-width:700px){.charts-row{grid-template-columns:1fr}.header{padding:20px 16px}}
   @keyframes spin{to{transform:rotate(360deg)}}
 </style>
@@ -88,7 +90,7 @@
   </div>
   <div class="header-right">
     <div class="period-badge">
-      <div style="opacity:.75;font-size:.75rem">PERÍODO ANALISADO</div>
+      <div style="opacity:.75;font-size:.75rem">PER&Iacute;ODO ANALISADO</div>
       <div class="period-val" id="periodDisplay">Fev&ndash;Jun/2026</div>
     </div>
     <div class="btn-group">
@@ -102,7 +104,7 @@
       </button>
     </div>
     <div id="updateStatus"></div>
-    <div style="font-size:.72rem;opacity:.6">Atualizado em <span id="lastUpdate">08/06/2026 09:45</span></div>
+    <div style="font-size:.72rem;opacity:.6">Atualizado em <span id="lastUpdate">08/06/2026</span></div>
   </div>
 </div>
 <div class="content">
@@ -111,13 +113,17 @@
     <select id="monthFilter"></select>
     <span id="filterInfo"></span>
   </div>
+  <div class="formula-note">
+    &#128220; <strong>F&oacute;rmula:</strong>
+    Postes &times;2,5 &nbsp;+&nbsp; CTOs &times;12,5 &nbsp;+&nbsp; CEOs &times;12,5 &nbsp;+&nbsp; Cabos km &times;1 &nbsp;+&nbsp; <strong>Deslocamento: horas &times;111 pts/h</strong>
+  </div>
   <div class="kpi-grid">
     <div class="kpi-card"><div class="kpi-label">Produtividade Total</div><div class="kpi-value" id="kpiProd">0</div><div class="kpi-sub">pontos acumulados</div></div>
-    <div class="kpi-card"><div class="kpi-label">Postes Auditados</div><div class="kpi-value" id="kpiPostes">0</div><div class="kpi-sub">&#215;2,5 pts cada</div></div>
-    <div class="kpi-card"><div class="kpi-label">CTOs Auditadas</div><div class="kpi-value" id="kpiCTOs">0</div><div class="kpi-sub">&#215;12,5 pts cada</div></div>
-    <div class="kpi-card"><div class="kpi-label">CEOs Auditadas</div><div class="kpi-value" id="kpiCEOs">0</div><div class="kpi-sub">&#215;12,5 pts cada</div></div>
-    <div class="kpi-card"><div class="kpi-label">Cabos Vistoriados KM</div><div class="kpi-value" id="kpiCabos">0</div><div class="kpi-sub">&#215;1 pt por km</div></div>
-    <div class="kpi-card"><div class="kpi-label">T&eacute;cnicos Ativos</div><div class="kpi-value" id="kpiTecnicos">0</div><div class="kpi-sub">no per&iacute;odo</div></div>
+    <div class="kpi-card"><div class="kpi-label">Postes Auditados</div><div class="kpi-value" id="kpiPostes">0</div><div class="kpi-sub">&times;2,5 pts cada</div></div>
+    <div class="kpi-card"><div class="kpi-label">CTOs Auditadas</div><div class="kpi-value" id="kpiCTOs">0</div><div class="kpi-sub">&times;12,5 pts cada</div></div>
+    <div class="kpi-card"><div class="kpi-label">CEOs Auditadas</div><div class="kpi-value" id="kpiCEOs">0</div><div class="kpi-sub">&times;12,5 pts cada</div></div>
+    <div class="kpi-card"><div class="kpi-label">Cabos Vistoriados KM</div><div class="kpi-value" id="kpiCabos">0</div><div class="kpi-sub">&times;1 pt por km</div></div>
+    <div class="kpi-card"><div class="kpi-label">Deslocamento</div><div class="kpi-value" id="kpiDeslPts">0</div><div class="kpi-sub" id="kpiDeslHrs">&times;111 pts/hora</div></div>
   </div>
   <div class="charts-row">
     <div class="chart-card"><h3>Produtividade por T&eacute;cnico</h3><p id="techSubtitle">Total acumulado &mdash; pontos</p><div style="height:260px"><canvas id="chartTechs"></canvas></div></div>
@@ -128,23 +134,24 @@
   </div>
   <div class="table-card" style="margin-bottom:20px">
     <h3>Ranking de Produtividade</h3>
-    <p>F&oacute;rmula: postes&#215;2,5 + CTOs&#215;12,5 + CEOs&#215;12,5 + Cabos km&#215;1</p>
-    <table><thead><tr><th>#</th><th>T&eacute;cnico</th><th>Produtividade</th><th class="num">Postes</th><th class="num">CTOs</th><th class="num">CEOs</th><th class="num">Cabos km</th><th class="num">Registros</th></tr></thead><tbody id="rankingBody"></tbody></table>
+    <p>Inclui pontuação de deslocamento (horas × 111 pts/h)</p>
+    <table><thead><tr><th>#</th><th>T&eacute;cnico</th><th>Produtividade</th><th class="num">Postes</th><th class="num">CTOs</th><th class="num">CEOs</th><th class="num">Cabos km</th><th class="num">Desl. (h)</th><th class="num">Registros</th></tr></thead><tbody id="rankingBody"></tbody></table>
   </div>
   <div class="table-card" style="margin-bottom:20px">
     <h3>Registros Recentes</h3>
-    <p>&Uacute;ltimos 20 lan&ccedil;amentos &mdash; colunas que entram na pontua&ccedil;&atilde;o</p>
+    <p>&Uacute;ltimos 20 lan&ccedil;amentos — as 5 colunas que entram na pontua&ccedil;&atilde;o</p>
     <table><thead><tr><th>Data</th><th>T&eacute;cnico</th><th class="num">Postes</th><th class="num">CTOs</th><th class="num">CEOs</th><th class="num">Cabos km</th><th>Deslocamento</th><th class="num">Pontos</th></tr></thead><tbody id="recentBody"></tbody></table>
   </div>
 </div>
 <div class="footer">Proxxima Telecomunica&ccedil;&otilde;es &nbsp;&middot;&nbsp; KPI PMO &mdash; Produtividade Equipes Externas &nbsp;&middot;&nbsp; Dados: Monday.com Board 6570366248</div>
 <script>
-const records = [{"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-05", "n1": 96, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 240.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-06", "n1": 0, "cto": 46, "ceo": 0, "cabos": 0, "desl": "", "prod": 575.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-10", "n1": 69, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 172.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-23", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-24", "n1": 482, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 1205.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-25", "n1": 205, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 512.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-13", "n1": 226, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 565.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-14", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-15", "n1": 360, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 900.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-16", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-17", "n1": 300, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 750.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-17", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-20", "n1": 104, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 260.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-22", "n1": 440, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 1100.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-23", "n1": 560, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 1400.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-24", "n1": 435, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 1087.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-27", "n1": 360, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 900.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-27", "n1": 355, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 887.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-28", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-29", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-30", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-04", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-05", "n1": 390, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 975.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-06", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-07", "n1": 288, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 720.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-08", "n1": 103, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 257.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-11", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-12", "n1": 512, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 1280.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-13", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-14", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-15", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-18", "n1": 62, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 155.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-19", "n1": 261, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 652.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-20", "n1": 304, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 760.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-21", "n1": 903, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 2257.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-22", "n1": 62, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 155.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-25", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-26", "n1": 180, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 450.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-27", "n1": 398, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 995.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-28", "n1": 351, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 877.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-28", "n1": 17, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 42.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-29", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-01", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "Viagem Campina X Picuí", "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-01", "n1": 88, "cto": 0, "ceo": 0, "cabos": 5, "desl": "", "prod": 225.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-01", "n1": 259, "cto": 0, "ceo": 0, "cabos": 9, "desl": "", "prod": 656.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-01", "n1": 91, "cto": 0, "ceo": 0, "cabos": 5, "desl": "", "prod": 232.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-02", "n1": 210, "cto": 0, "ceo": 0, "cabos": 12, "desl": "Viagem Picuí PB X Parelhas RN", "prod": 537.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-02", "n1": 0, "cto": 0, "ceo": 6, "cabos": 18, "desl": "", "prod": 93.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-03", "n1": 193, "cto": 0, "ceo": 12, "cabos": 22, "desl": "Picuí X Sossêgo / Cubati X Queimadas", "prod": 654.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-05", "n1": 177, "cto": 0, "ceo": 15, "cabos": 0, "desl": "", "prod": 630.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-13", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-14", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-15", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-18", "n1": 18, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 45.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-19", "n1": 78, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 195.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-19", "n1": 82, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 205.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-20", "n1": 88, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 220.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-21", "n1": 233, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 582.5}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-22", "n1": 150, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 375.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-25", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-26", "n1": 228, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 570.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-26", "n1": 228, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 570.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-26", "n1": 228, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 570.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-27", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-28", "n1": 55, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 137.5}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-28", "n1": 0, "cto": 0, "ceo": 12, "cabos": 0, "desl": "", "prod": 150.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-29", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-01", "n1": 116, "cto": 12, "ceo": 0, "cabos": 11, "desl": "", "prod": 451.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-01", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "prod": 0.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-02", "n1": 0, "cto": 0, "ceo": 25, "cabos": 18, "desl": "", "prod": 330.5}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-02", "n1": 0, "cto": 0, "ceo": 13, "cabos": 11, "desl": "", "prod": 173.5}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-03", "n1": 0, "cto": 0, "ceo": 13, "cabos": 11, "desl": "02:40 deslocamento", "prod": 173.5}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-05", "n1": 25, "cto": 0, "ceo": 0, "cabos": 0, "desl": "Alagoa Nova-PB a João Pessoa-PB", "prod": 62.5}];
+const records = [{"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-05", "n1": 96, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 240.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-06", "n1": 0, "cto": 46, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 575.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-10", "n1": 69, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 172.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-23", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-24", "n1": 482, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 1205.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-02-25", "n1": 205, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 512.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-13", "n1": 226, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 565.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-14", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-15", "n1": 360, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 900.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-16", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-17", "n1": 300, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 750.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-17", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-20", "n1": 104, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 260.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-22", "n1": 440, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 1100.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-23", "n1": 560, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 1400.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-24", "n1": 435, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 1087.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-27", "n1": 360, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 900.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-27", "n1": 355, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 887.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-28", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-29", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-04-30", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-04", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-05", "n1": 390, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 975.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-06", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-07", "n1": 288, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 720.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-08", "n1": 103, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 257.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-11", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-12", "n1": 512, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 1280.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-13", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-14", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-15", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-18", "n1": 62, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 155.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-19", "n1": 261, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 652.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-20", "n1": 304, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 760.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-21", "n1": 903, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 2257.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-22", "n1": 62, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 155.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-25", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-26", "n1": 180, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 450.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-27", "n1": 398, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 995.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-28", "n1": 351, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 877.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-28", "n1": 17, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 42.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-05-29", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-01", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "Viagem Campina X Picuí", "desl_mins": 110, "prod": 203.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-01", "n1": 88, "cto": 0, "ceo": 0, "cabos": 5, "desl": "", "desl_mins": 0, "prod": 225.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-01", "n1": 259, "cto": 0, "ceo": 0, "cabos": 9, "desl": "", "desl_mins": 0, "prod": 656.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-01", "n1": 91, "cto": 0, "ceo": 0, "cabos": 5, "desl": "", "desl_mins": 0, "prod": 232.5}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-02", "n1": 210, "cto": 0, "ceo": 0, "cabos": 12, "desl": "Viagem Picuí PB X Parelhas RN", "desl_mins": 114, "prod": 747.9}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-02", "n1": 0, "cto": 0, "ceo": 6, "cabos": 18, "desl": "", "desl_mins": 0, "prod": 93.0}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-03", "n1": 193, "cto": 0, "ceo": 12, "cabos": 22, "desl": "Picuí X Sossêgo / Cubati X Queimadas", "desl_mins": 118, "prod": 872.8}, {"tecnico": "Edvan Gomes da Silva", "data5": "2026-06-05", "n1": 177, "cto": 0, "ceo": 15, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 630.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-13", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-14", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-15", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-18", "n1": 18, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 45.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-19", "n1": 78, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 195.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-19", "n1": 82, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 205.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-20", "n1": 88, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 220.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-21", "n1": 233, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 582.5}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-22", "n1": 150, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 375.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-25", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-26", "n1": 228, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 570.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-26", "n1": 228, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 570.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-26", "n1": 228, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 570.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-27", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-28", "n1": 55, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 137.5}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-28", "n1": 0, "cto": 0, "ceo": 12, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 150.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-05-29", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-01", "n1": 116, "cto": 12, "ceo": 0, "cabos": 11, "desl": "", "desl_mins": 0, "prod": 451.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-01", "n1": 0, "cto": 0, "ceo": 0, "cabos": 0, "desl": "", "desl_mins": 0, "prod": 0.0}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-02", "n1": 0, "cto": 0, "ceo": 25, "cabos": 18, "desl": "", "desl_mins": 0, "prod": 330.5}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-02", "n1": 0, "cto": 0, "ceo": 13, "cabos": 11, "desl": "", "desl_mins": 0, "prod": 173.5}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-03", "n1": 0, "cto": 0, "ceo": 13, "cabos": 11, "desl": "02:40 deslocamento", "desl_mins": 160, "prod": 469.5}, {"tecnico": "Bernardo Braz da Silva", "data5": "2026-06-05", "n1": 25, "cto": 0, "ceo": 0, "cabos": 0, "desl": "Alagoa Nova-PB a João Pessoa-PB", "desl_mins": 118, "prod": 280.8}];
+const DESL_RATE = 111; // pts por hora
 
 const MONTH_NAMES = {'2026-02':'Fev/26','2026-04':'Abr/26','2026-05':'Mai/26','2026-06':'Jun/26'};
 const MONTH_FULL  = {'2026-02':'Fevereiro/2026','2026-04':'Abril/2026','2026-05':'Maio/2026','2026-06':'Junho/2026'};
 const COLORS = ['#0e2d5e','#00a99d','#e05a2b','#7c3aed','#dc2626','#0891b2'];
-const METRIC_COLORS = ['#0e2d5e','#00a99d','#e05a2b','#7c3aed'];
+const METRIC_COLORS = ['#0e2d5e','#00a99d','#e05a2b','#059669','#f59e0b'];
 
 function getMonth(d){ return d.slice(0,7); }
 const allMonths = [...new Set(records.map(r=>getMonth(r.data5)))].sort();
@@ -154,6 +161,12 @@ const opt0 = document.createElement('option'); opt0.value='all'; opt0.textConten
 allMonths.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=MONTH_FULL[m]||m; sel.appendChild(o); });
 sel.value = allMonths[allMonths.length-1];
 
+function fmtMins(mins){
+  if(!mins) return '';
+  const h = Math.floor(mins/60), m = mins%60;
+  return m ? h+'h'+String(m).padStart(2,'0')+'min' : h+'h';
+}
+
 let chartTechs, chartMetrics, chartEvol;
 
 function render(selMonth){
@@ -161,27 +174,33 @@ function render(selMonth){
 
   const techMap = {};
   recs.forEach(r=>{
-    if(!techMap[r.tecnico]) techMap[r.tecnico]={prod:0,postes:0,cto:0,ceo:0,cabos:0,count:0};
-    techMap[r.tecnico].prod   += r.prod;
-    techMap[r.tecnico].postes += r.n1;
-    techMap[r.tecnico].cto   += r.cto;
-    techMap[r.tecnico].ceo   += r.ceo;
-    techMap[r.tecnico].cabos += r.cabos;
-    techMap[r.tecnico].count += 1;
+    if(!techMap[r.tecnico]) techMap[r.tecnico]={prod:0,postes:0,cto:0,ceo:0,cabos:0,desl_mins:0,count:0};
+    const d=techMap[r.tecnico];
+    d.prod    += r.prod;
+    d.postes  += r.n1;
+    d.cto    += r.cto;
+    d.ceo    += r.ceo;
+    d.cabos  += r.cabos;
+    d.desl_mins += r.desl_mins;
+    d.count  += 1;
   });
-  const techs      = Object.entries(techMap).sort((a,b)=>b[1].prod-a[1].prod);
-  const totalProd  = recs.reduce((s,r)=>s+r.prod,0);
-  const totalPostes= recs.reduce((s,r)=>s+r.n1,0);
-  const totalCTO   = recs.reduce((s,r)=>s+r.cto,0);
-  const totalCEO   = recs.reduce((s,r)=>s+r.ceo,0);
-  const totalCabos = recs.reduce((s,r)=>s+r.cabos,0);
+  const techs       = Object.entries(techMap).sort((a,b)=>b[1].prod-a[1].prod);
+  const totalProd   = recs.reduce((s,r)=>s+r.prod,0);
+  const totalPostes = recs.reduce((s,r)=>s+r.n1,0);
+  const totalCTO    = recs.reduce((s,r)=>s+r.cto,0);
+  const totalCEO    = recs.reduce((s,r)=>s+r.ceo,0);
+  const totalCabos  = recs.reduce((s,r)=>s+r.cabos,0);
+  const totalDeslMins = recs.reduce((s,r)=>s+r.desl_mins,0);
+  const totalDeslPts  = Math.round((totalDeslMins/60)*DESL_RATE*10)/10;
 
-  document.getElementById('kpiProd').textContent     = totalProd.toLocaleString('pt-BR',{maximumFractionDigits:0});
+  document.getElementById('kpiProd').textContent     = Math.round(totalProd).toLocaleString('pt-BR');
   document.getElementById('kpiPostes').textContent   = totalPostes.toLocaleString('pt-BR');
   document.getElementById('kpiCTOs').textContent     = totalCTO.toLocaleString('pt-BR');
   document.getElementById('kpiCEOs').textContent     = totalCEO.toLocaleString('pt-BR');
   document.getElementById('kpiCabos').textContent    = totalCabos.toLocaleString('pt-BR');
-  document.getElementById('kpiTecnicos').textContent = techs.length;
+  document.getElementById('kpiDeslPts').textContent  = Math.round(totalDeslPts).toLocaleString('pt-BR')+' pts';
+  const dh=Math.floor(totalDeslMins/60), dm=totalDeslMins%60;
+  document.getElementById('kpiDeslHrs').textContent  = dh+'h'+(dm?dm+'min':'')+' de deslocamento';
 
   const periodEl = document.getElementById('periodDisplay');
   const infoEl   = document.getElementById('filterInfo');
@@ -193,44 +212,47 @@ function render(selMonth){
     infoEl.textContent   = recs.length + ' registros neste mês';
   }
 
-  // Chart 1: Produtividade por técnico
+  // Chart 1 — barras horizontais por técnico
   if(chartTechs) chartTechs.destroy();
   chartTechs = new Chart(document.getElementById('chartTechs'),{
     type:'bar',
-    data:{ labels:techs.map(t=>t[0].split(' ').slice(0,2).join(' ')), datasets:[{ label:'Produtividade', data:techs.map(t=>Math.round(t[1].prod)), backgroundColor:techs.map((_,i)=>COLORS[i%COLORS.length]), borderRadius:8, borderSkipped:false }] },
+    data:{ labels:techs.map(t=>t[0].split(' ').slice(0,2).join(' ')), datasets:[{label:'Produtividade',data:techs.map(t=>Math.round(t[1].prod)),backgroundColor:techs.map((_,i)=>COLORS[i%COLORS.length]),borderRadius:8,borderSkipped:false}] },
     options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.parsed.x.toLocaleString('pt-BR')+' pts'}}}, scales:{x:{grid:{color:'#eef0f3'}},y:{grid:{display:false}}} }
   });
 
-  // Chart 2: Contribuição por métrica
+  // Chart 2 — contribuição por métrica (incluindo deslocamento)
   const metricPts = [
     Math.round(totalPostes*2.5),
     Math.round(totalCTO*12.5),
     Math.round(totalCEO*12.5),
-    Math.round(totalCabos*1)
+    Math.round(totalCabos*1),
+    Math.round(totalDeslPts)
   ];
   if(chartMetrics) chartMetrics.destroy();
   chartMetrics = new Chart(document.getElementById('chartMetrics'),{
     type:'doughnut',
-    data:{ labels:['Postes ×2,5','CTOs ×12,5','CEOs ×12,5','Cabos km ×1'], datasets:[{data:metricPts, backgroundColor:METRIC_COLORS, hoverOffset:8}] },
+    data:{ labels:['Postes ×2,5','CTOs ×12,5','CEOs ×12,5','Cabos km ×1','Deslocamento ×111/h'], datasets:[{data:metricPts,backgroundColor:METRIC_COLORS,hoverOffset:8}] },
     options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'right',labels:{font:{size:11},padding:10}}, tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed.toLocaleString('pt-BR')+' pts'}} } }
   });
 
-  // Chart 3: Evolução mensal
+  // Chart 3 — evolução mensal
   const months = selMonth==='all' ? allMonths : [selMonth];
   const datasets = techs.map((t,i)=>{ const color=COLORS[i%COLORS.length]; return { label:t[0].split(' ').slice(0,2).join(' '), data:months.map(m=>{ const r=records.filter(x=>x.tecnico===t[0]&&getMonth(x.data5)===m); return Math.round(r.reduce((s,x)=>s+x.prod,0)); }), backgroundColor:color+'55', borderColor:color, borderWidth:2.5, tension:0.3, fill:true }; });
   if(chartEvol) chartEvol.destroy();
   chartEvol = new Chart(document.getElementById('chartEvol'),{
-    type: months.length===1 ? 'bar' : 'line',
+    type: months.length===1?'bar':'line',
     data:{ labels:months.map(m=>MONTH_NAMES[m]||m), datasets },
     options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top',labels:{font:{size:11}}}}, scales:{x:{grid:{display:false}},y:{grid:{color:'#eef0f3'},ticks:{callback:v=>v.toLocaleString('pt-BR')}}} }
   });
 
   // Ranking
   const maxProd = techs[0]?.[1].prod||1;
+  const techKeys = Object.keys(techMap);
   document.getElementById('rankingBody').innerHTML = techs.map(([tech,d],i)=>{
     const color=COLORS[i%COLORS.length]; const pct=Math.round((d.prod/maxProd)*100);
     const medals=['&#127945;','&#127946;','&#127947;'];
     const ini=tech.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('');
+    const deslH = (d.desl_mins/60).toFixed(1);
     return '<tr><td><span class="rank-badge" style="background:'+(['#f59e0b','#94a3b8','#cd7f32'][i]||'#e2e8f0')+'">'+(medals[i]||i+1)+'</span></td>'
       +'<td style="display:flex;align-items:center"><span class="tech-avatar" style="background:'+color+'">'+ini+'</span>'+tech+'</td>'
       +'<td><strong>'+Math.round(d.prod).toLocaleString('pt-BR')+'</strong> pts<div class="prod-bar"><div class="prod-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div></td>'
@@ -238,18 +260,24 @@ function render(selMonth){
       +'<td class="num">'+d.cto.toLocaleString('pt-BR')+'</td>'
       +'<td class="num">'+d.ceo.toLocaleString('pt-BR')+'</td>'
       +'<td class="num">'+d.cabos.toLocaleString('pt-BR')+'</td>'
+      +'<td class="num">'+deslH+'h</td>'
       +'<td class="num">'+d.count+'</td></tr>';
   }).join('');
 
-  // Registros recentes com colunas corretas
+  // Registros recentes — colunas corretas + deslocamento com pts
   const recent=[...recs].sort((a,b)=>b.data5.localeCompare(a.data5)).slice(0,20);
-  const techKeys=Object.keys(techMap);
   document.getElementById('recentBody').innerHTML = recent.map(r=>{
     const d=r.data5; const df=d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4);
     const tIdx=techKeys.indexOf(r.tecnico); const color=COLORS[tIdx>=0?tIdx:0];
     const ini=r.tecnico.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('');
-    const n = v=>v?v.toLocaleString('pt-BR'):'<span style="color:#cbd5e1">&mdash;</span>';
-    const desl=r.desl?'<span class="desl-tag">'+r.desl+'</span>':'<span style="color:#cbd5e1">&mdash;</span>';
+    const n=v=>v?v.toLocaleString('pt-BR'):'<span style="color:#cbd5e1">&mdash;</span>';
+    let deslCell='<span style="color:#cbd5e1">&mdash;</span>';
+    if(r.desl_mins>0){
+      const dpts=Math.round((r.desl_mins/60)*DESL_RATE*10)/10;
+      deslCell='<span class="desl-tag">'+fmtMins(r.desl_mins)+'</span>'+(r.desl?'<br><span style="font-size:.68rem;color:#78716c">'+r.desl+'</span>':'')+'<span class="desl-pts">+'+dpts.toLocaleString('pt-BR')+'pts</span>';
+    } else if(r.desl){
+      deslCell='<span class="desl-tag">'+r.desl+'</span>';
+    }
     return '<tr>'
       +'<td>'+df+'</td>'
       +'<td style="display:flex;align-items:center"><span class="tech-avatar" style="background:'+color+';font-size:.62rem">'+ini+'</span>'+r.tecnico.split(' ').slice(0,2).join(' ')+'</td>'
@@ -257,7 +285,7 @@ function render(selMonth){
       +'<td class="num">'+n(r.cto)+'</td>'
       +'<td class="num">'+n(r.ceo)+'</td>'
       +'<td class="num">'+n(r.cabos)+'</td>'
-      +'<td>'+desl+'</td>'
+      +'<td>'+deslCell+'</td>'
       +'<td class="num"><strong style="color:#0e2d5e">'+r.prod.toLocaleString('pt-BR',{maximumFractionDigits:1})+'</strong></td>'
       +'</tr>';
   }).join('');
