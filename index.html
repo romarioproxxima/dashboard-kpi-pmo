@@ -579,7 +579,7 @@ const ROUTE_MINS_LIVE=[
   [/campina.*lajedo|lajedo.*campina/,171],
 ];
 function _dnorm(s){
-  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 }
 function parseDeslMinsJS(text){
   if(!text)return 0; const t=_dnorm(text); let m;
