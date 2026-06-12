@@ -569,29 +569,111 @@ async function openKmzAuditModal(){
 }
 function closeKmzModal(){document.getElementById('kmzOverlay').classList.remove('open');document.body.style.overflow='';}
 
-/* ===== ATUALIZAÇÃO AO VIVO DO MONDAY ===== */
-const ROUTE_MINS_LIVE=[
+/* ===== Live-update helpers ===== */
+const ROUTE_MINS_LIVE = [
   [/campina.*picui|picui.*campina/,110],
   [/picui.*parelhas|parelhas.*picui/,114],
-  [/picui.*soss|cubati.*queimadas/,118],
+  [/picui.*soss[ae]go|cubati.*queimadas/,118],
   [/alagoa.*cabedelo|cabedelo.*alagoa/,160],
-  [/alagoa.*jo[aã]o.?pessoa|jo[aã]o.?pessoa.*alagoa/,118],
+  [/alagoa.*jo[ao]o.?pessoa|jo[ao]o.?pessoa.*alagoa/,118],
   [/campina.*lajedo|lajedo.*campina/,171],
 ];
 function _dnorm(s){
   return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 }
 function parseDeslMinsJS(text){
-  if(!text)return 0; const t=_dnorm(text); let m;
+  if(!text)return 0;
+  const t=_dnorm(text); let m;
   m=t.match(/(\d+)\s+horas?\s+e\s+(\d+)\s+minutos?/); if(m)return +m[1]*60 + +m[2];
-  m=t.match(/(\d+)\s+horas?/); if(m){const mm=t.match(/(\d+)\s*min/);return +m[1]*60+(mm?+mm[1]:0);}
+  m=t.match(/(\d+)\s+horas?/);
+  if(m){const mm=t.match(/(\d+)\s*min/);return +m[1]*60+(mm?+mm[1]:0);}
   m=text.match(/(\d{1,2}):(\d{2})/); if(m)return +m[1]*60 + +m[2];
-  m=t.match(/(\d+)h\b/); if(m){const mm=t.match(/(\d+)\s*min/);return +m[1]*60+(mm?+mm[1]:0);}
+  m=t.match(/(\d+)h\b/);
+  if(m){const mm=t.match(/(\d+)\s*min/);return +m[1]*60+(mm?+mm[1]:0);}
   m=t.match(/(\d+)\s*minutos?/); if(m)return +m[1];
   for(const [pat,mins] of ROUTE_MINS_LIVE){if(pat.test(t))return mins;}
   return 0;
 }
 function _colVal(item,colId){
-  /* Suporta array (Monday raw) e dict (MCP processado) */
   if(Array.isArray(item.column_values)){
-    const c=item.
+    const c=item.column_values.find(x=>x.id===colId);
+    return c?(c.text!=null?String(c.text):''):'';
+  }
+  const v=(item.column_values&&item.column_values[colId]);
+  return v!=null?String(v):'';
+}
+function processMonday(items){
+  const out=[];
+  for(const it of items){
+    const tech=_colVal(it,'sele__o_individual__1'); if(!tech.trim())continue;
+    const date=_colVal(it,'data5'); if(!date.trim())continue;
+    const n1   =parseFloat(_colVal(it,'n_mero1'))      ||0;
+    const cto  =parseFloat(_colVal(it,'n_meros62__1')) ||0;
+    const ceo  =parseFloat(_colVal(it,'numeric_mkwpbbr'))  ||0;
+    const cabos=parseFloat(_colVal(it,'numeric_mm3y8gz8')) ||0;
+    const desl =_colVal(it,'text_mm3zh5yf');
+    const desl_mins=parseDeslMinsJS(desl);
+    const prod=Math.round((n1*2.5+cto*12.5+ceo*12.5+cabos+(desl_mins/60)*DESL_RATE)*10)/10;
+    out.push({tecnico:tech,data5:date,n1,cto,ceo,cabos,desl,desl_mins,prod});
+  }
+  return out;
+}
+/* ===== requestUpdate: 3 caminhos ===== */
+async function requestUpdate(){
+  const btn=document.querySelector('.update-btn'),st=document.getElementById('updateStatus');
+  const SVG_SPIN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="animation:spin 1s linear infinite"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M4 9a8 8 0 0 1 14.93-2M20 15a8 8 0 0 1-14.93 2"/></svg>';
+  const SVG_IDLE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M4 9a8 8 0 0 1 14.93-2M20 15a8 8 0 0 1-14.93 2"/></svg>';
+  btn.disabled=true; btn.innerHTML=SVG_SPIN+' Buscando...';
+  st.style.display='block'; st.textContent='Consultando Monday.com...';
+  /* PATH 1: callMcpTool (Cowork com Monday MCP) */
+  if(window.cowork&&typeof window.cowork.callMcpTool==='function'){
+    try{
+      const r=await window.cowork.callMcpTool(
+        'mcp__f2ceae86-18da-4512-8c3d-c4451a45c7f8__get_board_items_page',
+        {boardId:6570366248,limit:200,includeColumns:true,
+         columnIds:['sele__o_individual__1','data5','n_mero1','n_meros62__1',
+                    'numeric_mkwpbbr','numeric_mm3y8gz8','text_mm3zh5yf']}
+      );
+      if(r.isError){throw new Error('MCP retornou erro: '+JSON.stringify(r.content));}
+      const data=r.structuredContent??JSON.parse(r.content[0].text);
+      const items=data.items||(data.boards&&data.boards[0]&&data.boards[0].items)||[];
+      if(!items.length){throw new Error('Nenhum item retornado pelo Monday');}
+      const newRecs=processMonday(items);
+      if(!newRecs.length){throw new Error('processMonday() retornou 0 registros');}
+      records.splice(0,records.length,...newRecs);
+      const newMonths=[...new Set(records.map(r=>getMonth(r.data5)))].sort();
+      const newTechs=[...new Set(records.map(r=>r.tecnico))];
+      allMonths.splice(0,allMonths.length,...newMonths);
+      techKeys.splice(0,techKeys.length,...newTechs);
+      /* Atualizar filtro de meses */
+      const selEl=document.getElementById('monthFilter');
+      while(selEl.options.length>1)selEl.remove(1);
+      newMonths.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=MONTH_FULL[m]||m;selEl.appendChild(o);});
+      selEl.value=newMonths[newMonths.length-1];
+      /* Atualizar data no header */
+      const dateEl=document.querySelector('.header-right [style*="opacity"]');
+      if(dateEl)dateEl.textContent='Atualizado em '+new Date().toLocaleDateString('pt-BR');
+      render(selEl.value);
+      st.style.display='block'; st.textContent='✅ '+newRecs.length+' registros atualizados do Monday.com';
+      setTimeout(()=>st.style.display='none',4000);
+    }catch(err){
+      st.style.display='block'; st.textContent='❌ Erro: '+err.message;
+    }finally{
+      btn.disabled=false; btn.innerHTML=SVG_IDLE+' Atualizar Dados';
+    }
+    return;
+  }
+  /* PATH 2: sendPrompt (Cowork sem callMcpTool) */
+  if(typeof sendPrompt==='function'){
+    sendPrompt('atualizar dashboard kpi pmo produtividade');
+    st.textContent='Aguardando Claude atualizar os dados...';
+    setTimeout(()=>{btn.disabled=false;btn.innerHTML=SVG_IDLE+' Atualizar Dados';},5000);
+    return;
+  }
+  /* PATH 3: GitHub Pages — instrução manual */
+  btn.disabled=false; btn.innerHTML=SVG_IDLE+' Atualizar Dados';
+  st.innerHTML='Abra o Claude Cowork e diga: <code onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent).then(()=>{this.style.outline=\'2px solid #4f7\'})" style="cursor:pointer;background:#1e293b;padding:2px 6px;border-radius:4px;font-size:.85em">atualizar dashboard kpi pmo produtividade</code>';
+}
+</script>
+</body>
+</html>
