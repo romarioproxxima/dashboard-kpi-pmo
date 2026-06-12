@@ -569,14 +569,25 @@ async function openKmzAuditModal(){
 }
 function closeKmzModal(){document.getElementById('kmzOverlay').classList.remove('open');document.body.style.overflow='';}
 
-function requestUpdate(){
-  const btn=document.querySelector('.update-btn'),st=document.getElementById('updateStatus');
-  btn.disabled=true; btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="animation:spin 1s linear infinite"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M4 9a8 8 0 0 1 14.93-2M20 15a8 8 0 0 1-14.93 2"/></svg> Aguardando...';
-  if(typeof sendPrompt==='function'){ sendPrompt('atualizar dashboard kpi pmo produtividade'); st.style.display='block'; st.textContent='Aguarde...'; }
-  else if(window.cowork&&typeof window.cowork.sendPrompt==='function'){ window.cowork.sendPrompt('atualizar dashboard kpi pmo produtividade'); st.style.display='block'; st.textContent='Aguarde...'; }
-  else { st.style.display='block'; st.innerHTML='Cole no Claude: <strong>atualizar dashboard kpi pmo produtividade</strong>'; }
-  setTimeout(()=>{ btn.disabled=false; btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M4 9a8 8 0 0 1 14.93-2M20 15a8 8 0 0 1-14.93 2"/></svg> Atualizar Dados'; },5000);
+/* ===== ATUALIZAÇÃO AO VIVO DO MONDAY ===== */
+const ROUTE_MINS_LIVE=[
+  [/campina.*picui|picui.*campina/,110],
+  [/picui.*parelhas|parelhas.*picui/,114],
+  [/picui.*soss|cubati.*queimadas/,118],
+  [/alagoa.*cabedelo|cabedelo.*alagoa/,160],
+  [/alagoa.*jo[aã]o.?pessoa|jo[aã]o.?pessoa.*alagoa/,118],
+  [/campina.*lajedo|lajedo.*campina/,171],
+];
+function _dnorm(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');}
+function parseDeslMinsJS(text){
+  if(!text)return 0; const t=_dnorm(text); let m;
+  m=t.match(/(\d+)\s+horas?\s+e\s+(\d+)\s+minutos?/); if(m)return +m[1]*60 + +m[2];
+  m=t.match(/(\d+)\s+horas?/); if(m){const mm=t.match(/(\d+)\s*min/);return +m[1]*60+(mm?+mm[1]:0);}
+  m=text.match(/(\d{1,2}):(\d{2})/); if(m)return +m[1]*60 + +m[2];
+  m=t.match(/(\d+)h\b/); if(m){const mm=t.match(/(\d+)\s*min/);return +m[1]*60+(mm?+mm[1]:0);}
+  m=t.match(/(\d+)\s*minutos?/); if(m)return +m[1];
+  for(const[pat,mins]of ROUTE_MINS_LIVE){if(pat.test(t))return mins;}
+  return 0;
 }
-</script>
-</body>
-</html>
+function _colVal(item,colId){
+  if(Array.isArray(item.column_values)){const c=item.column_values.find(x=>x.id===colId);return c?c.text||'':(c?.value||'')
