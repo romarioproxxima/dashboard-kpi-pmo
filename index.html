@@ -578,7 +578,9 @@ const ROUTE_MINS_LIVE=[
   [/alagoa.*jo[aã]o.?pessoa|jo[aã]o.?pessoa.*alagoa/,118],
   [/campina.*lajedo|lajedo.*campina/,171],
 ];
-function _dnorm(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');}
+function _dnorm(s){
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+}
 function parseDeslMinsJS(text){
   if(!text)return 0; const t=_dnorm(text); let m;
   m=t.match(/(\d+)\s+horas?\s+e\s+(\d+)\s+minutos?/); if(m)return +m[1]*60 + +m[2];
@@ -586,8 +588,10 @@ function parseDeslMinsJS(text){
   m=text.match(/(\d{1,2}):(\d{2})/); if(m)return +m[1]*60 + +m[2];
   m=t.match(/(\d+)h\b/); if(m){const mm=t.match(/(\d+)\s*min/);return +m[1]*60+(mm?+mm[1]:0);}
   m=t.match(/(\d+)\s*minutos?/); if(m)return +m[1];
-  for(const[pat,mins]of ROUTE_MINS_LIVE){if(pat.test(t))return mins;}
+  for(const [pat,mins] of ROUTE_MINS_LIVE){if(pat.test(t))return mins;}
   return 0;
 }
 function _colVal(item,colId){
-  if(Array.isArray(item.column_values)){const c=item.column_values.find(x=>x.id===colId);return c?c.text||'':(c?.value||'')
+  /* Suporta array (Monday raw) e dict (MCP processado) */
+  if(Array.isArray(item.column_values)){
+    const c=item.
